@@ -35,6 +35,12 @@ def image(args):
 
 def main():
     os.makedirs(CACHE, exist_ok=True)
+    marker = os.path.join(CACHE, "params.txt")
+    want = f"{MAX_SIDE}-{QUALITY}-v2"
+    if not os.path.exists(marker) or open(marker).read() != want:  # drop images made with other settings
+        for f in os.listdir(CACHE):
+            if f.endswith(".webp"): os.remove(os.path.join(CACHE, f))
+        open(marker, "w").write(want)
     dbf = os.path.join(CACHE, "exercises.json")
     if not os.path.exists(dbf):
         open(dbf, "wb").write(get(DB_URL))

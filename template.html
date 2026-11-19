@@ -411,9 +411,13 @@ function copyText(plan){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){toast("Copied");},fb);
   else fb();
 }
-function downloadFile(plan){
+function buildDoc(plan){
   var css=document.querySelector("style").textContent;
-  var doc='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>'+esc(plan.plan.name)+'</title><style>'+css+'</style></head><body><main>'+planHtml(plan)+'<p class="notes">Demo images come from the free-exercise-db open dataset. Video links need internet.</p></main></body></html>';
+  var data=JSON.stringify({app:"gym-forge",version:1,p:plan.p,plan:plan.plan}).replace(/</g,"\\u003c");
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>'+esc(plan.plan.name)+'</title><style>'+css+'</style><script type="application/json" id="gymforge-plan">'+data+'<\/script></head><body><main>'+planHtml(plan)+'<p class="notes">Demo images come from the free-exercise-db open dataset. Video links need internet. Import this file into Forge Log to track workouts.</p></main></body></html>';
+}
+function downloadFile(plan){
+  var doc=buildDoc(plan);
   var a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([doc],{type:"text/html"}));
   a.download=slug(plan.plan.name)+".html";
@@ -447,6 +451,8 @@ function renderSaved(){
     b.onclick=function(){save("gp:plans",load("gp:plans",[]).filter(function(x){return x.id!==b.dataset.del;}));renderSaved();toast("Deleted");};
   });
 }
+
+window.GymPlanner.buildDoc=buildDoc;
 
 /* ---------- form ---------- */
 function readP(){
